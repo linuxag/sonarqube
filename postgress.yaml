@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  labels:
+    app: postgres
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: postgres
+        env: prod
+    spec:
+      containers:
+      - name: postgres-container
+        image: postgres
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+          - name: POSTGRES_PASSWORD
+            value: "sonarquberry@12"  
+        volumeMounts:
+          - name: postgres-data
+            mountPath: /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432    
+      volumes:
+        - name: postgres-data
+          nfs:
+            server: 192.168.0.2
+            path: "/devops/postgress"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres
+    env: prod
+spec:
+  selector:
+    app: postgres
+    env: prod
+  ports:
+  - name: postgres
+    protocol: TCP
+    port: 5432
+    targetPort: 5432
+    nodePort: 30007
+  type: NodePort

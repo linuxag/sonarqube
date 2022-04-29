@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "haproxy"
+    haproxy.org/rewrite-target: "/"
+  name: sonarqube-ingress
+spec:
+  rules:
+  - host: sonarqube.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarqube-service
+            port:
+              number: 9000
+  tls:
+  - secretName: example-cert
+    hosts:
+    - sonarqube.example.com
